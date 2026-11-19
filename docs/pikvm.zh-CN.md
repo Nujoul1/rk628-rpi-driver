@@ -2,9 +2,9 @@
 
 [English](pikvm.md) | **简体中文**
 
-在 Raspberry Pi 4 和 Raspberry Pi 5 的 DIY PiKVM V2 系统上使用瑞莎 4K HDMI IN 转 MIPI CSI-2 转接板，实现 HDMI 视频和音频采集。
+该文档主要讲解如何基于 `瑞莎 4K HDMI IN 转 MIPI CSI-2 转接板` 在 Raspberry Pi 4 和 Raspberry Pi 5 使用 PiKVM，实现 HDMI 视频和音频采集。
 
-使用修改版 uStreamer，增加了 Pi5 软件 H.264 编码，额外支持 Pi5 的HDMI 转 CSI-2 及两个平台的音频采集。详情见 [uStreamer RK628 分支](https://github.com/Nujoul1/ustreamer/tree/rk628)。
+PiKVM 官方的 DIY 方案并不支持和音频采集，而且 Pi5 平台上不支持 HDMI 转 CSI-2 方案，所以该文档的方案使用了经过修改的 uStreamer，增加了 Pi5 软件 H.264 编码，额外支持 Pi5 的HDMI 转 CSI-2 及两个平台的音频采集。详情见 [uStreamer RK628 分支](https://github.com/Nujoul1/ustreamer/tree/rk628)。
 
 ## 测试环境
 
@@ -25,22 +25,30 @@ Pi4 和 Pi5 均安装同一个修改版 uStreamer，软件及新增编码依赖�
 
 ## 硬件连接
 
-音视频采集接线参考 [README 的硬件连接](../README.zh-CN.md#硬件连接)，PiKVM 的其他接线参考 [DIY PiKVM V2 官方接线说明](https://docs.pikvm.org/v2/#wiring)。
+音视频采集接线参考 [README 的硬件连接](../README.zh-CN.md#硬件连接)，其他 PiKVM 所需接线参考 [DIY PiKVM V2 官方接线说明](https://docs.pikvm.org/v2/#wiring)。
+
+> [!IMPORTANT]
+> Pi5 预配置镜像默认使用 CAM/DISP1，如使用该镜像，请将转接板连接到该接口，或者烧录镜像后自行改为 CAM/DISP0，请将 `/boot/config.txt` 最后一行的 `dtoverlay=rk628-pi5,cam1,audio` 改为 `dtoverlay=rk628-pi5,cam0,audio`，然后重启。
 
 ## 安装与配置
 
-以下步骤用于在官方 PiKVM OS 镜像上安装 RK628 驱动和修改版 uStreamer，请按顺序操作。
+本方案基于 PiKVM OS 官方镜像从源码构建整个运行环境，想要快速体验功能可以根据下方的 [镜像](#镜像) 小节下载对应平台的现成镜像，然后跳到 [验证](#验证) 章节直接体验 PiKVM 的功能。
 
 ### 镜像
 
-在[官方镜像下载页面](https://docs.pikvm.org/flashing_os/#download-the-image)选择对应镜像：
-
-- Pi4：`DIY PiKVM V2 Platform → Raspberry Pi 4 64-bit → For HDMI-CSI bridge`。
-- Pi5：`DIY PiKVM V2 Platform → Raspberry Pi 5 64-bit → For HDMI-USB dongle`。
+可直接使用 PiKVM 的完整镜像：
+- pi4：[rk628-pikvm-pi4.img.xz](https://github.com/Nujoul1/rk628-rpi-driver/releases/latest/download/rk628-pikvm-pi4.img.xz)
+- pi5：[rk628-pikvm-pi5.img.xz](https://github.com/Nujoul1/rk628-rpi-driver/releases/latest/download/rk628-pikvm-pi5.img.xz)
 
 烧录方法参考[官方烧录说明](https://docs.pikvm.org/flashing_os/#using-rpi-imager-linux-macos-and-windows)。
 
-预配置的 RK628 PiKVM 镜像暂未提供，请先使用官方镜像按下文安装。
+> [!IMPORTANT]
+> Pi5 预配置镜像默认使用 CAM/DISP1，请将转接板连接到该接口，或者烧录镜像后自行改为 CAM/DISP0，请将 `/boot/config.txt` 最后一行的 `dtoverlay=rk628-pi5,cam1,audio` 改为 `dtoverlay=rk628-pi5,cam0,audio`，然后重启。
+
+想从源码构建的用户在[官方镜像下载页面](https://docs.pikvm.org/flashing_os/#download-the-image)选择对应镜像：
+
+- Pi4：`DIY PiKVM V2 Platform → Raspberry Pi 4 64-bit → For HDMI-CSI bridge`。
+- Pi5：`DIY PiKVM V2 Platform → Raspberry Pi 5 64-bit → For HDMI-USB dongle`。
 
 ### 依赖
 
@@ -333,9 +341,11 @@ sync
 ro
 ```
 
-刷新浏览器，选择 WebRTC H.264 后调节音量。Direct H.264 和 MJPEG 模式不传输音频。
-
 ## 验证
+
+终端默认用户名和秘密：root
+
+网页默认用户名和秘密：admin
 
 根据 [PiKVM UI](https://docs.pikvm.org/webui/)，确认 HDMI 画面正常；切换到 WebRTC 模式，确认声音正常。HDMI 输入分辨率或音频采样率变化后，画面和声音应自动恢复，无需重启服务。
 
@@ -344,11 +354,6 @@ PiKVM 各项功能的使用方法参考[官方使用文档](https://docs.pikvm.o
 ## 更新
 
 后续执行 `pikvm-update` 时，官方软件包更新可能覆盖手动安装的 uStreamer 和 Janus 插件。更新后需要重新编译安装修改版。
-
-```bash
-rw
-cd /root/ustreamer-rk628
-```
 
 从 [RK628 uStreamer](#rk628-ustreamer) 的 `make clean` 开始，重新执行编译、安装及检查步骤。使用已下载的源码目录即可。
 

@@ -2,9 +2,9 @@
 
 **English** | [简体中文](pikvm.zh-CN.md)
 
-Use the Radxa 4K HDMI IN to MIPI CSI-2 Adapter for HDMI video and audio capture with DIY PiKVM V2 on Raspberry Pi 4 and Raspberry Pi 5.
+This guide explains how to use PiKVM on Raspberry Pi 4 and Raspberry Pi 5 with the `Radxa 4K HDMI IN to MIPI CSI-2 Adapter` for HDMI video and audio capture.
 
-The modified uStreamer adds software H.264 encoding on Pi 5, HDMI-to-CSI-2 support on Pi 5, and audio capture on both platforms. See the [uStreamer RK628 branch](https://github.com/Nujoul1/ustreamer/tree/rk628) for details.
+The official DIY PiKVM setups do not support audio capture, and the Pi 5 setup does not support HDMI-to-CSI-2 adapters. This setup therefore uses a modified uStreamer that adds software H.264 encoding on Pi 5, HDMI-to-CSI-2 support on Pi 5, and audio capture on both platforms. See the [uStreamer RK628 branch](https://github.com/Nujoul1/ustreamer/tree/rk628) for details.
 
 ## Test environments
 
@@ -27,20 +27,29 @@ Pi 4 and Pi 5 use the same modified uStreamer. The versions of the software and 
 
 For audio and video capture wiring, see [Hardware connections in the README](../README.md#hardware-connections). For the remaining PiKVM wiring, see the [official DIY PiKVM V2 wiring instructions](https://docs.pikvm.org/v2/#wiring).
 
+> [!IMPORTANT]
+> The preconfigured Pi 5 image uses CAM/DISP1 by default. Connect the adapter to this port, or switch to CAM/DISP0 after flashing by changing the last line of `/boot/config.txt` from `dtoverlay=rk628-pi5,cam1,audio` to `dtoverlay=rk628-pi5,cam0,audio`, then reboot.
+
 ## Installation and configuration
 
-Follow the steps below in order to install the RK628 driver and modified uStreamer on an official PiKVM OS image.
+This setup builds the complete runtime environment from source on an official PiKVM OS image. To try it quickly, download the preconfigured image for your platform from the [OS image](#os-image) section below, then skip to [Verification](#verification) to start using PiKVM.
 
 ### OS image
 
-Select the appropriate image from the [official image download page](https://docs.pikvm.org/flashing_os/#download-the-image):
+Ready-to-use PiKVM images:
 
-- Pi 4: `DIY PiKVM V2 Platform → Raspberry Pi 4 64-bit → For HDMI-CSI bridge`.
-- Pi 5: `DIY PiKVM V2 Platform → Raspberry Pi 5 64-bit → For HDMI-USB dongle`.
+- Pi 4: [rk628-pikvm-pi4.img.xz](https://github.com/Nujoul1/rk628-rpi-driver/releases/latest/download/rk628-pikvm-pi4.img.xz).
+- Pi 5: [rk628-pikvm-pi5.img.xz](https://github.com/Nujoul1/rk628-rpi-driver/releases/latest/download/rk628-pikvm-pi5.img.xz).
 
 For flashing instructions, see the [official flashing guide](https://docs.pikvm.org/flashing_os/#using-rpi-imager-linux-macos-and-windows).
 
-A preconfigured RK628 PiKVM image is not available yet. Use an official image and follow the installation steps below.
+> [!IMPORTANT]
+> The preconfigured Pi 5 image uses CAM/DISP1 by default. Connect the adapter to this port, or switch to CAM/DISP0 after flashing by changing the last line of `/boot/config.txt` from `dtoverlay=rk628-pi5,cam1,audio` to `dtoverlay=rk628-pi5,cam0,audio`, then reboot.
+
+To build from source, select the appropriate image from the [official image download page](https://docs.pikvm.org/flashing_os/#download-the-image):
+
+- Pi 4: `DIY PiKVM V2 Platform → Raspberry Pi 4 64-bit → For HDMI-CSI bridge`.
+- Pi 5: `DIY PiKVM V2 Platform → Raspberry Pi 5 64-bit → For HDMI-USB dongle`.
 
 ### Dependencies
 
@@ -333,9 +342,11 @@ sync
 ro
 ```
 
-Refresh the browser, select WebRTC H.264, and adjust the volume. Direct H.264 and MJPEG modes do not carry audio.
-
 ## Verification
+
+Default terminal username and password: root
+
+Default web interface username and password: admin
 
 Using the [PiKVM UI](https://docs.pikvm.org/webui/), check that the HDMI picture is displayed correctly. Switch to WebRTC mode and check the audio. Video and audio should recover automatically after the HDMI input resolution or audio sample rate changes, without restarting the services.
 
@@ -344,11 +355,6 @@ For instructions on using PiKVM's features, see the [official user documentation
 ## Updates
 
 When you run `pikvm-update`, official package updates may overwrite the manually installed uStreamer application and Janus plugin. Rebuild and reinstall the modified version after updating.
-
-```bash
-rw
-cd /root/ustreamer-rk628
-```
 
 Starting with `make clean` in [RK628 uStreamer](#rk628-ustreamer), repeat the build, installation, and verification steps. Use the source directory you already downloaded.
 
