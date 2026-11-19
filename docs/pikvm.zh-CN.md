@@ -4,7 +4,7 @@
 
 该文档主要讲解如何基于 `瑞莎 4K HDMI IN 转 MIPI CSI-2 转接板` 在 Raspberry Pi 4 和 Raspberry Pi 5 使用 PiKVM，实现 HDMI 视频和音频采集。
 
-PiKVM 官方的 DIY 方案并不支持和音频采集，而且 Pi5 平台上不支持 HDMI 转 CSI-2 方案，所以该文档的方案使用了经过修改的 uStreamer，增加了 Pi5 软件 H.264 编码，额外支持 Pi5 的HDMI 转 CSI-2 及两个平台的音频采集。详情见 [uStreamer RK628 分支](https://github.com/Nujoul1/ustreamer/tree/rk628)。
+PiKVM 官方的 DIY 方案并不支持音频采集，而且 Pi5 平台上不支持 HDMI 转 CSI-2 方案，所以该文档的方案使用了经过修改的 uStreamer，增加了 Pi5 软件 H.264 编码，额外支持 Pi5 的HDMI 转 CSI-2 及两个平台的音频采集。详情见 [uStreamer RK628 分支](https://github.com/Nujoul1/ustreamer/tree/rk628)。
 
 ## 测试环境
 
@@ -343,9 +343,9 @@ ro
 
 ## 验证
 
-终端默认用户名和秘密：root
+终端默认用户名和密码：root
 
-网页默认用户名和秘密：admin
+网页默认用户名和密码：admin
 
 根据 [PiKVM UI](https://docs.pikvm.org/webui/)，确认 HDMI 画面正常；切换到 WebRTC 模式，确认声音正常。HDMI 输入分辨率或音频采样率变化后，画面和声音应自动恢复，无需重启服务。
 
